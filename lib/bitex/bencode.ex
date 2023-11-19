@@ -1,16 +1,19 @@
 defmodule Bitex.Bencode do
-  @spec decode(encoded_value :: binary()) :: String.t()
-  def decode(encoded_value) when is_binary(encoded_value) do
-    binary_data = :binary.bin_to_list(encoded_value)
-    case Enum.find_index(binary_data, fn char -> char == 58 end) do
-      nil ->
-        IO.puts("The ':' character is not found in the binary")
-      index ->
-        rest = Enum.slice(binary_data, index+1..-1)
-        List.to_string(rest)
-    end
+  def decode(encoded_value) when is_binary(encoded_value), do: decode_type(encoded_value)
+
+  def decode(_), do: "Invalid encoded value: not binary"
+
+  # decode an integer
+  def decode_type("i" <> rest) do
+    rest
+    |> String.split("e", trim: true)
+    |> List.first()
+    |> String.to_integer()
   end
 
-  @spec decode(encoded_value :: any()) :: String.t()
-  def decode(_), do: "Invalid encoded value: not binary"
+  # decode a string
+  def decode_type(value) do
+    [length, string] = String.split(value, ":", parts: 2, trim: true)
+    String.slice(string, 0, String.to_integer(length))
+  end
 end
