@@ -11,4 +11,4 @@ mix local.hex --force
 mix deps.get
 mix escript.build
 
-./bittorrent "$@"
+./bitex "$@"
