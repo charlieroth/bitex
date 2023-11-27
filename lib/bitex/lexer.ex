@@ -8,6 +8,7 @@ defmodule Bitex.Lexer do
 
   @spec lex(String.t(), [Token.t()]) :: [Token.t()]
   def lex(<<>>, tokens), do: [:eoe | tokens] |> Enum.reverse()
+
   def lex(input, tokens) do
     {token, rest} = tokenize(input)
     lex(rest, [token | tokens])
@@ -23,6 +24,7 @@ defmodule Bitex.Lexer do
     case input do
       "e" <> rest ->
         {{:list, Enum.reverse(acc)}, rest}
+
       rest ->
         {token, rest} = tokenize(rest)
         read_list(rest, [token | acc])
@@ -31,6 +33,7 @@ defmodule Bitex.Lexer do
 
   @spec read_integer(String.t(), binary()) :: {Token.t(), String.t()}
   def read_integer("e" <> input, acc), do: {{:integer, String.to_integer(acc)}, input}
+
   def read_integer(<<ch::8, rest::binary>>, acc) when is_integer_character(ch) do
     read_integer(rest, <<acc::binary, ch::utf8>>)
   end
@@ -42,5 +45,4 @@ defmodule Bitex.Lexer do
     {string, rest} = String.split_at(rest, len)
     {{:string, string}, rest}
   end
-
 end
