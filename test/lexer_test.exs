@@ -64,4 +64,44 @@ defmodule Bitex.LexerTest do
              ] = Lexer.init(input)
     end
   end
+
+  describe "dictionaries" do
+    test "only dictionary" do
+      input = "d3:foo3:bar5:helloi52ee"
+
+      assert [
+               {:dictionary,
+                %{{:string, "foo"} => {:string, "bar"}, {:string, "hello"} => {:integer, 52}}},
+               :eoe
+             ] = Lexer.init(input)
+    end
+
+    test "dictionary with list" do
+      input = "d3:foo3:bar5:hellol5:worldi52eee"
+
+      assert [
+               {:dictionary,
+                %{
+                  {:string, "foo"} => {:string, "bar"},
+                  {:string, "hello"} => {:list, [{:string, "world"}, {:integer, 52}]}
+                }},
+               :eoe
+             ] = Lexer.init(input)
+    end
+
+    test "dictionary with nested lists" do
+      input = "d3:foo3:bar5:hellol5:worldl5:universeli42eee"
+
+      assert [
+               {:dictionary,
+                %{
+                  {:string, "foo"} => {:string, "bar"},
+                  {:string, "hello"} =>
+                    {:list,
+                     [{:string, "world"}, {:list, [{:string, "universe"}, {:integer, 42}]}]}
+                }},
+               :eoe
+             ] = Lexer.init(input)
+    end
+  end
 end

@@ -15,9 +15,23 @@ defmodule Bitex.Lexer do
   end
 
   @spec tokenize(String.t()) :: {Token.t(), String.t()}
+  defp tokenize(<<"d", rest::binary>>), do: read_dictionary(rest, %{})
   defp tokenize(<<"l", rest::binary>>), do: read_list(rest, [])
   defp tokenize(<<"i", rest::binary>>), do: read_integer(rest, <<>>)
   defp tokenize(input), do: read_string(input)
+
+  @spec read_dictionary(String.t(), map()) :: {Token.t(), String.t()}
+  def read_dictionary(input, acc) do
+    case input do
+      "e" <> rest ->
+        {{:dictionary, acc}, rest}
+
+      rest ->
+        {key, rest} = read_string(rest)
+        {value, rest} = tokenize(rest)
+        read_dictionary(rest, Map.put(acc, key, value))
+    end
+  end
 
   @spec read_list(String.t(), [Token.t()]) :: {Token.t(), String.t()}
   def read_list(input, acc) do
