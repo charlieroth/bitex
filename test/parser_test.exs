@@ -118,5 +118,30 @@ defmodule Bitex.PaserTest do
 
       assert %{"messages" => ["hello", ["world", 52]], "answer" => 42} = Parser.init(input)
     end
+
+    test "dictionary with nested dictionary" do
+      input = [
+        {:dictionary,
+         %{
+           {:string, "inner_dict"} =>
+             {:dictionary,
+              %{
+                {:string, "key1"} => {:string, "value1"},
+                {:string, "key2"} => {:integer, 42},
+                {:string, "list_key"} =>
+                  {:list, [{:string, "item1"}, {:string, "item2"}, {:integer, 3}]}
+              }}
+         }},
+        :eoe
+      ]
+
+      assert %{
+               "inner_dict" => %{
+                 "key1" => "value1",
+                 "key2" => 42,
+                 "list_key" => ["item1", "item2", 3]
+               }
+             } = Parser.init(input)
+    end
   end
 end

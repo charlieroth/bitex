@@ -33,20 +33,37 @@ defmodule Bitex.Parser do
   end
 
   def parse([{:list, tokens} | rest], results) do
-    result = parse(tokens, [])
-    parse(rest, [result | results])
+    parsed_list = parse({:list, tokens})
+    parse(rest, [parsed_list | results])
   end
 
   def parse([{:integer, value} | rest], results) do
-    parse(rest, [value | results])
+    parsed_integer = parse({:integer, value})
+    parse(rest, [parsed_integer | results])
   end
 
   def parse([{:string, value} | rest], results) do
-    parse(rest, [value | results])
+    parsed_string = parse({:string, value})
+    parse(rest, [parsed_string | results])
   end
 
   def parse({:list, tokens}) do
-    parse(tokens, [])
+    Enum.map(tokens, &parse/1)
+  end
+
+  def parse({:dictionary, key}) do
+    result =
+      Enum.reduce(key, %{}, fn {key, value}, acc ->
+        parsed_value = parse(value)
+
+        if is_list(parsed_value) and Enum.count(parsed_value) == 1 do
+          Map.put(acc, parse(key), Enum.at(parsed_value, 0))
+        else
+          Map.put(acc, parse(key), parsed_value)
+        end
+      end)
+
+    result
   end
 
   def parse({:string, key}), do: key

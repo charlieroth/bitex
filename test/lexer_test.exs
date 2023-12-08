@@ -89,8 +89,27 @@ defmodule Bitex.LexerTest do
              ] = Lexer.init(input)
     end
 
+    test "dictionary with nested dictionary" do
+      input = "d10:inner_dictd4:key16:value14:key2i42e8:list_keyl5:item15:item2i3eeee"
+
+      assert [
+               {:dictionary,
+                %{
+                  {:string, "inner_dict"} =>
+                    {:dictionary,
+                     %{
+                       {:string, "key1"} => {:string, "value1"},
+                       {:string, "key2"} => {:integer, 42},
+                       {:string, "list_key"} =>
+                         {:list, [{:string, "item1"}, {:string, "item2"}, {:integer, 3}]}
+                     }}
+                }},
+               :eoe
+             ] = Lexer.init(input)
+    end
+
     test "dictionary with nested lists" do
-      input = "d3:foo3:bar5:hellol5:worldl5:universeli42eee"
+      input = "d3:foo3:bar5:hellol5:worldl8:universei42eeee"
 
       assert [
                {:dictionary,

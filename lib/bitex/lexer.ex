@@ -15,10 +15,21 @@ defmodule Bitex.Lexer do
   end
 
   @spec tokenize(String.t()) :: {Token.t(), String.t()}
-  defp tokenize(<<"d", rest::binary>>), do: read_dictionary(rest, %{})
-  defp tokenize(<<"l", rest::binary>>), do: read_list(rest, [])
-  defp tokenize(<<"i", rest::binary>>), do: read_integer(rest, <<>>)
-  defp tokenize(input), do: read_string(input)
+  defp tokenize(<<"d", rest::binary>>) do
+    read_dictionary(rest, %{})
+  end
+
+  defp tokenize(<<"l", rest::binary>>) do
+    read_list(rest, [])
+  end
+
+  defp tokenize(<<"i", rest::binary>>) do
+    read_integer(rest, <<>>)
+  end
+
+  defp tokenize(input) do
+    read_string(input)
+  end
 
   @spec read_dictionary(String.t(), map()) :: {Token.t(), String.t()}
   def read_dictionary(input, acc) do
@@ -46,7 +57,9 @@ defmodule Bitex.Lexer do
   end
 
   @spec read_integer(String.t(), binary()) :: {Token.t(), String.t()}
-  def read_integer("e" <> input, acc), do: {{:integer, String.to_integer(acc)}, input}
+  def read_integer("e" <> rest, acc) do
+    {{:integer, String.to_integer(acc)}, rest}
+  end
 
   def read_integer(<<ch::8, rest::binary>>, acc) when is_integer_character(ch) do
     read_integer(rest, <<acc::binary, ch::utf8>>)
